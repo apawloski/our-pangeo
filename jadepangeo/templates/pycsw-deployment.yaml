@@ -1,0 +1,76 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: pycsw
+  labels:
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: redirect
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: pycsw
+        component: pycsw
+        release: {{ .Release.Name }}
+        heritage: {{ .Release.Service }}
+    spec:
+      containers:
+        - name: pycsw
+          resources:
+            requests:
+              cpu: 0.15
+          image: axiom/docker-pycsw
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          volumeMounts:
+            - name: scratch
+              mountPath: /scratch
+            - name: force
+              mountPath: /force
+            - name: export
+              mountPath: /export
+            - name: store
+              mountPath: /store
+            - name: database
+              mountPath: /database
+      volumes:
+        - name: scratch
+          flexVolume:
+            driver: "informaticslab/goofys-flex-volume"
+            options:
+              bucket: "rsignell/scratch"
+              dirMode: "0777"
+              fileMode: "0777"
+        - name: force
+          flexVolume:
+            driver: "informaticslab/goofys-flex-volume"
+            options:
+              bucket: "rsignell/pycsw/force"
+              dirMode: "0777"
+              fileMode: "0777"
+        - name: export
+          flexVolume:
+            driver: "informaticslab/goofys-flex-volume"
+            options:
+              bucket: "rsignell/pycsw/export"
+              dirMode: "0777"
+              fileMode: "0777"
+        - name: store
+          flexVolume:
+            driver: "informaticslab/goofys-flex-volume"
+            options:
+              bucket: "rsignell/pycsw/store"
+              dirMode: "0777"
+              fileMode: "0777"
+        - name: database
+          flexVolume:
+            driver: "informaticslab/goofys-flex-volume"
+            options:
+              bucket: "rsignell/pycsw/database"
+              dirMode: "0777"
+              fileMode: "0777"
